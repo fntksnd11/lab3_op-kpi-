@@ -1,0 +1,24 @@
+{
+  "name": "memoize-cache",
+  "version": "1.0.0",
+  "description": "Advanced memoization with configurable cache eviction strategies (LRU, LFU, TTL)",
+  "main": "lab3_op.js",
+  "scripts": {
+  },
+  "keywords": [
+    "memoize",
+    "cache",
+    "lru",
+    "lfu",
+    "ttl",
+  ],
+  
+  "author": "Anton Dashuk",
+  "license": "-",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fntksnd11/lab3_op-kpi"
+  },
+  "bugs": {
+  },
+}
