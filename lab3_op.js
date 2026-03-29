@@ -470,6 +470,27 @@ function finalMemoize(fn, options = {}) {
     
     return result;
   };
+    memoizedFn.clearCache = () => cache.clear();
+  memoizedFn.getCacheSize = () => cache.size();
+  memoizedFn.getStats = () => cache.getStats();
+  memoizedFn.setMaxSize = (newSize) => { cache.maxSize = newSize; };
+  memoizedFn.setStrategy = (newStrategy) => { cache.strategy = newStrategy; };
+  memoizedFn.inspect = () => ({
+    size: cache.size(),
+    maxSize: cache.maxSize,
+    strategy: cache.strategy,
+    stats: cache.getStats(),
+    hasTTL: !!cache.ttl
+  });
+  
+  return memoizedFn;
+}
+
+module.exports = {
+  memoize: finalMemoize,
+  customPolicies,
+  MemoizeCache: OptimizedMemoizeCache
+};
 }
 
  
