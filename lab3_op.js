@@ -419,7 +419,57 @@ class OptimizedMemoizeCache extends EnhancedMemoizeCache {
     };
   }
 }
+const customPolicies = {
 
+  evictLargest: (items) => {
+    return items
+      .sort((a, b) => {
+        const sizeA = JSON.stringify(a[1].value).length;
+        const sizeB = JSON.stringify(b[1].value).length;
+        return sizeB - sizeA;
+      })
+      .slice(0, 1)
+      .map(([key]) => key);
+  },
+  
+
+  scoreBased: (scoreFn) => (items) => {
+    const scored = items.map(([key, entry]) => ({
+      key,
+      score: scoreFn(key, entry.value, entry.metadata)
+    }));
+    scored.sort((a, b) => a.score - b.score);
+    return scored.slice(0, 1).map(item => item.key);
+  },
+  
+ 
+  random: (items) => {
+    const randomIndex = Math.floor(Math.random() * items.length);
+    return [items[randomIndex][0]];
+  }
+};
+
+
+function finalMemoize(fn, options = {}) {
+
+  if (options.strategy === 'custom' && options.customEvict) {
+    options.customEvict = OptimizedMemoizeCache.createCustomPolicy(options.customEvict);
+  }
+  
+  const cache = new OptimizedMemoizeCache(options);
+  
+  const memoizedFn = function(...args) {
+    const cachedValue = cache.get(args);
+    
+    if (cachedValue !== null) {
+      return cachedValue;
+    }
+    
+    const result = fn.apply(this, args);
+    cache.set(args, result);
+    
+    return result;
+  };
 }
 
  
