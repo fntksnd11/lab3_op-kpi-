@@ -177,9 +177,8 @@ function memoize(fn, options = {}) {
   const memoizedFn = function(...args) {
     const cachedValue = cache.get(args);
     
-    if (cachedValue !== null) {
-      return cachedValue;
-    }
+    const cachedValue = cache.get(args);
+    if (cachedValue !== undefined) return cachedValue;
     
     const result = fn.apply(this, args);
     cache.set(args, result);
@@ -301,10 +300,7 @@ function enhancedMemoize(fn, options = {}) {
   
   const memoizedFn = function(...args) {
     const cachedValue = cache.get(args);
-    
-    if (cachedValue !== null) {
-      return cachedValue;
-    }
+    if (cachedValue !== undefined) return cachedValue;
     
     const result = fn.apply(this, args);
     cache.set(args, result);
