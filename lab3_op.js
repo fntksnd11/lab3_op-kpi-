@@ -328,7 +328,7 @@ class OptimizedMemoizeCache extends EnhancedMemoizeCache {
   constructor(options = {}) {
     super(options);
     this.hashFunction = options.hashFunction || this._defaultHash;
-    this.onEvict = options.onEvict || null; // Callback when entries are evicted
+    this.onEvict = options.onEvict || null; 
     this.stats = {
       hits: 0,
       misses: 0,
@@ -338,7 +338,7 @@ class OptimizedMemoizeCache extends EnhancedMemoizeCache {
   }
 
   _defaultHash(args) {
-    // Optimized hashing for common cases
+    
     if (args.length === 0) return 'undefined';
     if (args.length === 1) {
       const arg = args[0];
@@ -376,6 +376,54 @@ class OptimizedMemoizeCache extends EnhancedMemoizeCache {
     super._deleteEntry(key);
     this.stats.evictions++;
   }
+    set(keyArgs, value) {
+    const key = this._generateKey(keyArgs);
+    const metadata = this._getMetadata();
+    
+    if (this.cache.has(key)) {
+      this._deleteEntry(key);
+    }
+    
+    this.cache.set(key, { value, metadata });
+    this._updateMetadata(key, metadata);
+    
+   
+    if (this.ttl && !this.timers.has(key)) {
+      const timer = setTimeout(() => {
+        if (this.cache.has(key)) {
+          this._deleteEntry(key);
+        }
+      }, this.ttl);
+      this.timers.set(key, timer);
+    }
+    
+    this._evict();
+    
+    return value;
+  }
+
+  getStats() {
+    return {
+      ...super.getStats(),
+      hits: this.stats.hits,
+      misses: this.stats.misses,
+      evictions: this.stats.evictions,
+      totalAccesses: this.stats.totalAccesses,
+      hitRate: this.stats.totalAccesses === 0 ? 0 : 
+        this.stats.hits / this.stats.totalAccesses
+    };
+  }
+
+ 
+  static createCustomPolicy(policyFn) {
+    return (cache) => {
+      const items = Array.from(cache.cache.entries());
+      const toEvict = policyFn(items);
+      toEvict.forEach(key => cache._deleteEntry(key));
+    };
+  }
+}
+
 }
 
  
